@@ -1,0 +1,25 @@
+{
+  "name": "tutorial",
+  "version": "1.0.0",
+  "description": "",
+  "main": "10-fs-sync.js",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andreysmattos/node-js.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/andreysmattos/node-js/issues"
+  },
+  "homepage": "https://github.com/andreysmattos/node-js#readme",
+  "dependencies": {
+    "loadsh": "^0.0.4"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  }
+}
