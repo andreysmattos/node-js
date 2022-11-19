@@ -1,16 +1,14 @@
-const http = require("http");
+const express = require("express");
+const {products} = require('./data');
 
-const server = http.createServer((req, res) => {
+const app = express();
 
-    res.writeHead(200, {
-        'content-type': 'text/plain'
-    });
-
-    res.write('<h1> Home Page </h1>');
-
-    res.end();
+app.get("/", (req, res) => {
+  res.json(products)
 });
 
-server.listen("4477", function () {
-  console.log("Server start");
+// app.use(express.json());
+
+app.listen(5000, () => {
+  console.log("Server listening on port 5000");
 });
