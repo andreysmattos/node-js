@@ -1,14 +1,19 @@
 const express = require("express");
-const {products} = require('./data');
-
+const logger = require("./logger");
+const authorize = require("./authorize");
+const morgan = require("morgan");
 const app = express();
 
+// app.use([logger, authorize]);
+app.use(morgan("tiny"));
+
 app.get("/", (req, res) => {
-  res.json(products)
+  return res.json({
+    id: 1,
+    name: "Shoes",
+  });
 });
 
-// app.use(express.json());
-
 app.listen(5000, () => {
-  console.log("Server listening on port 5000");
+  console.log("Server is listening on port 5000...");
 });
