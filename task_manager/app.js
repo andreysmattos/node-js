@@ -1,5 +1,8 @@
 require("dotenv").config();
 const express = require("express");
+
+const connectDB = require("./db/connect");
+
 // const taskRouter = require('./routes/api');
 const apiRouter = require("./routes/api");
 
@@ -14,4 +17,13 @@ app.use("/api/v1", apiRouter);
 //   res.send("teste");
 // });
 
-app.listen(port, () => console.log(`Server is running on port: ${port}`));
+const start = async () => {
+  try {
+    await connectDB();
+    app.listen(port, () => console.log(`Server is running on port: ${port}`));
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+start();
