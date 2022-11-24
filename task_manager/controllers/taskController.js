@@ -1,21 +1,35 @@
-const index = (req, res) => {
-  res.status(200).json([1, 2, 3]);
+const Task = require("../models/task");
+
+const index = async (req, res) => {
+  const tasks = await Task.find();
+  res.status(200).json(tasks);
 };
 
-const store = (req, res) => {
-  res.status(201).json(req.body);
+const store = async (req, res) => {
+  const task = await Task.create(req.body);
+  res.status(201).json({ task });
 };
 
-const show = (req, res) => {
-  res.status(200).json(req.params);
+const show = async (req, res) => {
+  const { id } = req.params;
+
+  const task = await Task.find({ _id: id });
+  res.status(200).json(task);
 };
 
-const update = (req, res) => {
-  res.status(200).json([req.params, req.body]);
+const update = async (req, res) => {
+  const { id } = req.params;
+
+  const task = await Task.updateOne({ _id: id }, req.body);
+
+  res.status(200).json(task);
 };
 
-const destroy = (req, res) => {
-  res.status(200).json(req.params);
+const destroy = async (req, res) => {
+  const { id } = req.params;
+
+  const task = await Task.deleteOne({ _id: id });
+  res.status(200).json();
 };
 
 module.exports = {
