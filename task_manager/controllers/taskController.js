@@ -1,36 +1,53 @@
 const Task = require("../models/task");
 
-const index = async (req, res) => {
+const asyncWrapper = require("../middleware/async");
+
+const index = asyncWrapper(async (req, res) => {
   const tasks = await Task.find();
-  res.status(200).json(tasks);
-};
+  return res.status(200).json({ tasks, amount: tasks.length });
+});
 
-const store = async (req, res) => {
+const store = asyncWrapper(async (req, res) => {
   const task = await Task.create(req.body);
-  res.status(201).json({ task });
-};
+  return res.status(201).json({ task });
+});
 
-const show = async (req, res) => {
-  const { id } = req.params;
+const show = asyncWrapper(async (req, res) => {
+  const { id: taskId } = req.params;
+  const task = await Task.findOne({ _id: taskId });
 
-  const task = await Task.find({ _id: id });
-  res.status(200).json(task);
-};
+  if (!task) {
+    return res.status(404).json({ msg: `No task with id: ${taskId}` });
+  }
 
-const update = async (req, res) => {
-  const { id } = req.params;
+  return res.status(200).json({ task });
+});
 
-  const task = await Task.updateOne({ _id: id }, req.body);
+const update = asyncWrapper(async (req, res) => {
+  const { id: taskId } = req.params;
 
-  res.status(200).json(task);
-};
+  const task = await Task.findOneAndUpdate({ _id: taskId }, req.body, {
+    new: true,
+    runValidators: true,
+  });
 
-const destroy = async (req, res) => {
-  const { id } = req.params;
+  if (!task) {
+    return res.status(404).json({ msg: `No task with id: ${taskId}` });
+  }
 
-  const task = await Task.deleteOne({ _id: id });
-  res.status(200).json();
-};
+  return res.status(200).json({ task });
+});
+
+const destroy = asyncWrapper(async (req, res) => {
+  const { id: taskId } = req.params;
+  const task = await Task.findOneAndDelete({ _id: taskId });
+
+  if (!task) {
+    return res.status(404).json({ msg: `No task with id: ${taskId}` });
+  }
+
+  return res.status(200).json({ task });
+});
 
 module.exports = {
   index,
