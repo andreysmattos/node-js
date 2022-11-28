@@ -1,0 +1,22 @@
+{
+  "name": "4-jwt",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "8.2",
+    "express": "4.17",
+    "express-async-errors": "3.1",
+    "http-status-code": "2.1",
+    "jsonwebtoken": "8.5",
+    "mongoose": "5.11"
+  },
+  "devDependencies": {
+    "nodemon": "2.0"
+  }
+}
