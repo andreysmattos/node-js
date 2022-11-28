@@ -1,5 +1,16 @@
+const customError = require('../errors/custom-error');
+
 const login = async (req, res) => {
-  return res.send("Fake login/Register/Singup Route");
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    throw new customError('Please provide username and password.', 400)
+  }
+
+  console.log("username", username);
+  console.log("password", password);
+
+  return res.json("Fake login/Register/Singup Route");
 };
 
 const dashboard = async (req, res) => {
