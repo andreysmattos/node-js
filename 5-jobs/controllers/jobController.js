@@ -1,5 +1,5 @@
 const index = async (req, res) => {
-  return res.send("index");
+  return res.send(req.auth);
 };
 
 const show = async (req, res) => {
