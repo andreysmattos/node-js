@@ -3,7 +3,7 @@ const { StatusCodes } = require("http-status-codes");
 const mongoose = require("mongoose");
 
 const errorHandlerMiddleware = (err, req, res, next) => {
-  console.log(err);
+  console.log(req.headers);
   if (err instanceof CustomAPIError) {
     return res.status(err.statusCode).json({ msg: err.message });
   } else if (err instanceof mongoose.Error.ValidationError) {

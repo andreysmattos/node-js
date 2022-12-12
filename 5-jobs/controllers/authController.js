@@ -12,6 +12,7 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
+  console.log("______ ALERT _______");
   const { email, password } = req.body;
 
   const user = await User.findOne({ email: email });
