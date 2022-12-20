@@ -18,6 +18,31 @@ const register = async (req, res) => {
   });
 };
 
+const updateUser = async (req, res) => {
+  const { email, name, lastName, location } = req.body;
+  const user_id = req.auth._id;
+
+  if (!email || !name || !lastName || !location) {
+    throw new BadRequestError("Please provide all values");
+  }
+
+  const result = await User.findOneAndUpdate(
+    { _id: user_id },
+    { email, name, lastName, location }
+  );
+
+  const token = await result.generateJwt();
+
+  return res.send({
+    user: {
+      name,
+      lastName,
+      location,
+      token,
+    },
+  });
+};
+
 const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -32,7 +57,14 @@ const login = async (req, res) => {
 
   const token = await user.generateJwt();
 
-  return res.status(StatusCodes.OK).send({ token: token });
+  return res.status(StatusCodes.OK).send({
+    user: {
+      name: user.name,
+      lastName: user.lastName,
+      location: user.location,
+      token,
+    },
+  });
 };
 
-module.exports = { login, register };
+module.exports = { login, register, updateUser };

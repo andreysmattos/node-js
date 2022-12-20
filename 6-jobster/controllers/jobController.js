@@ -3,12 +3,29 @@ const { StatusCodes } = require("http-status-codes");
 const { NotFoundError } = require("../errors");
 
 const index = async (req, res) => {
-  console.log(req.headers.authorizationf);
+  /*
+    status: interview
+    jobType: remote
+    sort: a-z
+    page: 1
+  */
+  const { status, jobType, sort, page } = req.query;
   const user_id = req.auth._id;
 
-  return res
-    .status(StatusCodes.OK)
-    .send(await Job.find({ user_id }).sort("createdAt"));
+  console.log({ status, jobType, sort, page });
+
+  const query = { user_id };
+
+  if (status && status !== "all") query.status = status;
+
+  if (jobType && jobType !== "all") query.jobType = jobType;
+
+  if (sort) {
+  }
+
+  const jobs = await Job.find(query).sort("createdAt");
+
+  return res.status(StatusCodes.OK).send({ jobs });
 };
 
 const show = async (req, res) => {
@@ -35,7 +52,7 @@ const update = async (req, res) => {
   const user_id = req.auth._id;
   const { company, position, status } = req.body;
 
-  const job = await Job.updateOne(
+  const job = await Job.findOneAndUpdate(
     { _id: id, user_id },
     { company, position, status },
     {
@@ -45,7 +62,7 @@ const update = async (req, res) => {
 
   if (!job) throw new NotFoundError();
 
-  return res.status(StatusCodes.ACCEPTED).send(job);
+  return res.status(StatusCodes.ACCEPTED).send({ job });
 };
 
 const destroy = async (req, res) => {

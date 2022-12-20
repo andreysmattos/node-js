@@ -20,7 +20,7 @@ app.use(helmet());
 app.use(xss());
 
 // routes
-app.use("/api", api);
+app.use("/api/v1", api);
 
 app.get("*", (req, res) => {
   res.sendFile(path.resolve(__dirname, "./client/build", "index.html"));

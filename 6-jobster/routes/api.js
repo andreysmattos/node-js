@@ -11,7 +11,8 @@ router.get("/jobs/:id", authenticate, jobController.show);
 router.patch("/jobs/:id", authenticate, jobController.update);
 router.delete("/jobs/:id", authenticate, jobController.destroy);
 
-router.post("/register", authController.register);
-router.post("/login", authController.login);
+router.post("/auth/register", authController.register);
+router.patch("/auth/updateUser", authenticate, authController.updateUser);
+router.post("/auth/login", authController.login);
 
 module.exports = router;
