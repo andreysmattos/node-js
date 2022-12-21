@@ -1,12 +1,14 @@
 const Job = require("../models/Job");
 const { StatusCodes } = require("http-status-codes");
-const { NotFoundError } = require("../errors");
+const {
+  NotFoundError,
+  UnauthenticatedError,
+  BadRequestError,
+} = require("../errors");
 
 const index = async (req, res) => {
   const { search, status, jobType, sort, page } = req.query;
   const user_id = req.auth._id;
-
-  console.log({ status, jobType, sort, page });
 
   const query = { user_id };
   let sortyBy = "-createdAt";
@@ -49,6 +51,12 @@ const store = async (req, res) => {
   const user_id = req.auth.id;
   const job = await Job.create({ company, position, status, user_id });
 
+  if (req.isTest()) {
+    throw new BadRequestError(
+      "Test user only allowd to perform read operations"
+    );
+  }
+
   return res.status(StatusCodes.CREATED).send(job);
 };
 
@@ -56,6 +64,12 @@ const update = async (req, res) => {
   const id = req.params.id;
   const user_id = req.auth._id;
   const { company, position, status } = req.body;
+
+  if (req.isTest()) {
+    throw new BadRequestError(
+      "Test user only allowd to perform read operations"
+    );
+  }
 
   const job = await Job.findOneAndUpdate(
     { _id: id, user_id },
@@ -73,6 +87,9 @@ const update = async (req, res) => {
 const destroy = async (req, res) => {
   const user_id = req.auth._id;
   const id = req.params.id;
+
+
+
   return res
     .status(StatusCodes.ACCEPTED)
     .send(await Job.deleteOne({ _id: id, user_id }));
