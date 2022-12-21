@@ -3,29 +3,34 @@ const { StatusCodes } = require("http-status-codes");
 const { NotFoundError } = require("../errors");
 
 const index = async (req, res) => {
-  /*
-    status: interview
-    jobType: remote
-    sort: a-z
-    page: 1
-  */
-  const { status, jobType, sort, page } = req.query;
+  const { search, status, jobType, sort, page } = req.query;
   const user_id = req.auth._id;
 
   console.log({ status, jobType, sort, page });
 
   const query = { user_id };
+  let sortyBy = "-createdAt";
 
+  if (search) query.position = { $regex: search, $options: "i" };
   if (status && status !== "all") query.status = status;
-
   if (jobType && jobType !== "all") query.jobType = jobType;
 
   if (sort) {
+    if (sort === "latest") sortyBy = "-createdAt";
+    if (sort === "oldest") sortyBy = "createdAt";
+    if (sort === "a-z") sortyBy = "position";
+    if (sort === "z-a") sortyBy = "-position";
   }
 
-  const jobs = await Job.find(query).sort("createdAt");
+  const limit = +req.query.limit || 10;
+  const skip = (req.query.page - 1) * limit;
 
-  return res.status(StatusCodes.OK).send({ jobs });
+  const jobs = await Job.find(query).limit(limit).skip(skip).sort(sortyBy);
+
+  const totalJobs = await Job.countDocuments(query);
+  const numOfPages = totalJobs / limit;
+
+  return res.status(StatusCodes.OK).send({ jobs, totalJobs, numOfPages });
 };
 
 const show = async (req, res) => {
