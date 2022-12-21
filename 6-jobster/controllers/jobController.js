@@ -88,11 +88,62 @@ const destroy = async (req, res) => {
   const user_id = req.auth._id;
   const id = req.params.id;
 
-
-
   return res
     .status(StatusCodes.ACCEPTED)
     .send(await Job.deleteOne({ _id: id, user_id }));
 };
 
-module.exports = { index, show, store, update, destroy };
+const showStats = async (req, res) => {
+  const user_id = req.auth._id;
+
+  const pipleLine = [
+    { $match: { user_id } },
+    {
+      $facet: {
+        defaultStats: [
+          {
+            $group: {
+              _id: "$status",
+              count: { $sum: 1 },
+            },
+          },
+        ],
+        monthlyApplications: [
+          {
+            $group: {
+              _id: {
+                year: { $year: "$createdAt" },
+                month: { $month: "$createdAt" },
+              },
+              count: { $sum: 1 },
+            },
+          },
+          { $sort: { "_id.year": -1, "_id.month": -1 } },
+          {
+            $limit: 10,
+          },
+          { $sort: { "_id.year": 1, "_id.month": 1 } },
+        ],
+      },
+    },
+  ];
+
+  const [result] = await Job.aggregate(pipleLine);
+
+  result.defaultStats = result.defaultStats.reduce((acc, cur) => {
+    acc[cur._id] = cur.count;
+    return acc;
+  }, {});
+
+  result.monthlyApplications = result.monthlyApplications.map((item) => {
+    const { year, month } = item._id;
+    const date = `${month} of ${year}`;
+    const count = item.count;
+
+    return { date, count };
+  });
+
+  res.status(StatusCodes.OK).json(result);
+};
+
+module.exports = { index, show, store, update, destroy, showStats };
