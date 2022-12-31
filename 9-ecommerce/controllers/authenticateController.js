@@ -1,6 +1,7 @@
 const { StatusCodes } = require("http-status-codes");
-const { BadRequest } = require("../Exceptions");
+const { BadRequest, Unanthenticated } = require("../Exceptions");
 const User = require("../Models/User");
+const jwt = require("../utils/jwt");
 
 const register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -16,15 +17,37 @@ const register = async (req, res) => {
   const user = new User({ name, email, password, role });
   await user.save();
 
-  return res.status(StatusCodes.CREATED).json({ user });
+  const tokenUser = { name: user.name, id: user._id, role: user.role };
+  jwt.attachCookiesToResponse(res, tokenUser);
+
+  return res.status(StatusCodes.CREATED).json({ user: tokenUser });
 };
 
 const login = async (req, res) => {
-  return res.send("Bah meo gurizin");
+  const { email, password } = req.body;
+
+  console.log({ email, password });
+
+  if (!email || !password)
+    throw new BadRequest("Please provide email and password");
+
+  const user = await User.findOne({ email });
+
+  if (!user) throw new Unanthenticated("User does not exists");
+
+  if (!(await user.attempt(password)))
+    throw new Unanthenticated("User does not exists.");
+
+  const tokenUser = { name: user.name, id: user._id, role: user.role };
+  jwt.attachCookiesToResponse(res, tokenUser);
+
+  return res.status(StatusCodes.OK).json({ user: tokenUser });
 };
 
 const logout = async (req, res) => {
-  return res.send("Bah meo gurizin");
+  res.cookie("token", "", { httpOnly: true, expires: new Date(0) });
+
+  return res.status(StatusCodes.OK).json({});
 };
 
 module.exports = {
