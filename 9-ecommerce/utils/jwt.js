@@ -24,12 +24,10 @@ const attachCookiesToResponse = (res, payload) => {
   return token;
 };
 
-const removeCookiesToResponse = (res) => {
-
-}
+const removeCookiesToResponse = (res) => {};
 module.exports = {
   create,
   verify,
   attachCookiesToResponse,
-  removeCookiesToResponse
+  removeCookiesToResponse,
 };

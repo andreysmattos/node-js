@@ -2,6 +2,7 @@ const { StatusCodes } = require("http-status-codes");
 const { BadRequest, Unanthenticated } = require("../Exceptions");
 const User = require("../Models/User");
 const jwt = require("../utils/jwt");
+const createUserToToken = require("../utils/createUserToToken");
 
 const register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -17,16 +18,14 @@ const register = async (req, res) => {
   const user = new User({ name, email, password, role });
   await user.save();
 
-  const tokenUser = { name: user.name, id: user._id, role: user.role };
-  jwt.attachCookiesToResponse(res, tokenUser);
+  const userToToken = createUserToToken(user);
+  jwt.attachCookiesToResponse(res, userToToken);
 
-  return res.status(StatusCodes.CREATED).json({ user: tokenUser });
+  return res.status(StatusCodes.CREATED).json({ user: userToToken });
 };
 
 const login = async (req, res) => {
   const { email, password } = req.body;
-
-  console.log({ email, password });
 
   if (!email || !password)
     throw new BadRequest("Please provide email and password");
@@ -38,10 +37,10 @@ const login = async (req, res) => {
   if (!(await user.attempt(password)))
     throw new Unanthenticated("User does not exists.");
 
-  const tokenUser = { name: user.name, id: user._id, role: user.role };
-  jwt.attachCookiesToResponse(res, tokenUser);
+  const userToToken = createUserToToken(user);
+  jwt.attachCookiesToResponse(res, userToToken);
 
-  return res.status(StatusCodes.OK).json({ user: tokenUser });
+  return res.status(StatusCodes.OK).json({ user: userToToken });
 };
 
 const logout = async (req, res) => {

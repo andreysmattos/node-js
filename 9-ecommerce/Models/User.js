@@ -30,11 +30,11 @@ const UserSchema = new mongoose.Schema({
 });
 
 UserSchema.pre("save", async function () {
-  if (this.password) {
-    const salt = await bcrypt.genSaltSync(10);
-    const hash = await bcrypt.hashSync(this.password, salt);
-    this.password = hash;
-  }
+  if (!this.isModified("password")) return;
+
+  const salt = await bcrypt.genSaltSync(10);
+  const hash = await bcrypt.hashSync(this.password, salt);
+  this.password = hash;
 });
 
 UserSchema.methods.attempt = async function (password) {

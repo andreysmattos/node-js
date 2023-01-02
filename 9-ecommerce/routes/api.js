@@ -8,10 +8,10 @@ router.post(`/auth/login`, authenticateController.login);
 router.get(`/auth/logout`, authenticateController.logout);
 
 router.get(`/users`, auth, hasRole("admin", "manager"), userController.index);
-router.get(`/users/current`, userController.showCurrent);
-router.patch(`/users/current`, userController.updateCurrent);
-router.patch(`/users/current/password`, userController.updateCurrentPassword);
+router.get(`/users/showMe`, auth, userController.showCurrent);
+router.patch(`/users/current`, auth, userController.updateCurrent);
+router.patch(`/users/current/password`, auth, userController.updateCurrentPassword);
 
-router.get(`/users/:id`, userController.show);
+router.get(`/users/:id`, auth, hasRole("admin", "manager"), userController.show);
 
 module.exports = router;

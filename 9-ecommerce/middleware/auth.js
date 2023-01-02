@@ -12,8 +12,6 @@ const auth = async (req, res, next) => {
     if (!user) throw new Unanthenticated("User is not valid");
 
     req.user = user;
-
-    console.log({ user });
     next();
   } catch (error) {
     throw new Unanthenticated("Provide a valid token");
