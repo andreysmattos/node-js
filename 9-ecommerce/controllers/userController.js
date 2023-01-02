@@ -19,6 +19,7 @@ const show = async (req, res) => {
 
   res.status(StatusCodes.OK).json({ user });
 };
+
 const updateCurrent = async (req, res) => {
   const { email, name } = req.body;
 

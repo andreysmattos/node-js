@@ -12,6 +12,6 @@ router.get(`/users/showMe`, auth, userController.showCurrent);
 router.patch(`/users/current`, auth, userController.updateCurrent);
 router.patch(`/users/current/password`, auth, userController.updateCurrentPassword);
 
-router.get(`/users/:id`, auth, hasRole("admin", "manager"), userController.show);
+router.get(`/users/:id`, auth, userController.show);
 
 module.exports = router;

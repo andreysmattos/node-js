@@ -1,10 +1,10 @@
-const {} = require("../Exceptions");
+const { Unanthenticated } = require("../Exceptions");
 
-const checkPermission = (requestUser, resourceUser) => {
-  console.log({ requestUser, resourceUser });
+const checkPermission = (requestUser, resourceUserId) => {
+  if (requestUser.role === "admin") return true;
+  if (requestUser._id.toString() === resourceUserId.toString()) return true;
 
-  console.log(typeof requestUser);
-  console.log(typeof resourceUser);
+  throw new Unanthenticated("You are not allowed");
 };
 
 module.exports = checkPermission;
