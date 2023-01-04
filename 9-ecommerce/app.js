@@ -3,6 +3,7 @@ require("express-async-errors");
 
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
+const fileUpload = require('express-fileupload');
 const express = require("express");
 const notFound = require("./middleware/notFound");
 const errorHandler = require("./middleware/errorHandler");
@@ -17,6 +18,9 @@ const port = process.env.PORT || 5000;
 app.use(morgan("tiny"));
 app.use(express.json());
 app.use(cookieParser(process.env.COOKIE_SCRET));
+app.use(fileUpload());
+
+app.use(express.static("./public"));
 
 app.use("/api/v1", api);
 
