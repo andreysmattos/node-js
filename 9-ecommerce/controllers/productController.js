@@ -88,7 +88,6 @@ const updateImage = async (req, res) => {
   }
 
   await image.mv(imagePath);
-
  
   res.status(StatusCodes.OK).json({image: `/uploads/${image.name}`});
 };
