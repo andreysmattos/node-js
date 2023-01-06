@@ -71,10 +71,18 @@ const destroy = async (req, res) => {
   res.status(StatusCodes.OK).json();
 };
 
+const showByProduct = async (req, res) => {
+  const { product_id } = req.params;
+
+  const reviews = await Review.find(product_id);
+  return res.status(StatusCodes.OK).json({ reviews, count: reviews.length });
+};
+
 module.exports = {
   index,
   store,
   show,
   update,
   destroy,
+  showByProduct
 };

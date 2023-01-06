@@ -19,6 +19,9 @@ router.patch(
 );
 router.get(`/users/:id`, auth, userController.show);
 
+router.get("/products/:id/reviews", auth, reviewController.showByProduct);
+
+
 router.get("/products", productController.index);
 router.get("/products/:id", productController.show);
 
@@ -43,5 +46,7 @@ router.get("/reviews/:id", reviewController.show);
 router.post("/reviews", auth, reviewController.store);
 router.patch("/reviews/:id", auth, reviewController.update);
 router.delete("/reviews/:id", auth, reviewController.destroy);
+
+
 
 module.exports = router;
