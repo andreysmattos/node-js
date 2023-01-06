@@ -4,7 +4,7 @@ const { BadRequest, Unanthenticated, NotFound } = require("../Exceptions");
 const path = require("path");
 
 const index = async (req, res) => {
-  const products = await Product.find({});
+  const products = await Product.find({}).populate("reviews");
   res.status(StatusCodes.OK).json({ products, count: products.length });
 };
 
@@ -88,8 +88,8 @@ const updateImage = async (req, res) => {
   }
 
   await image.mv(imagePath);
- 
-  res.status(StatusCodes.OK).json({image: `/uploads/${image.name}`});
+
+  res.status(StatusCodes.OK).json({ image: `/uploads/${image.name}` });
 };
 
 module.exports = {

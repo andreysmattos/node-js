@@ -47,7 +47,14 @@ const ProductSchema = new mongoose.Schema(
     averageRating: { type: "number", default: 0 },
     user_id: { type: mongoose.Types.ObjectId, ref: "User", required: true },
   },
-  { timestamps: true }
+  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
+
+ProductSchema.virtual("reviews", {
+  ref: "Review",
+  localField: "_id",
+  foreignField: "product_id",
+  justOne: false,
+});
 
 module.exports = mongoose.model("Product", ProductSchema);
