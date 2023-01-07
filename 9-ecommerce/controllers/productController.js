@@ -10,7 +10,7 @@ const index = async (req, res) => {
 
 const show = async (req, res) => {
   const { id } = req.params;
-  const product = await Product.findById(id);
+  const product = await Product.findById(id).populate("reviews");;
 
   if (!product) throw new NotFound(`No product with id: ${id}`);
   res.status(StatusCodes.OK).json({ product });
