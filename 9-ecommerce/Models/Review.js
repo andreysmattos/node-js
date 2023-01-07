@@ -27,29 +27,47 @@ const ReviewSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-ReviewSchema.post(["remove", "create", "update", "save"], updateReviews);
-
-async function updateReviews(next) {
-  await this.model("Review").aggregate([
+ReviewSchema.statics.calculateAverageRating = async function (product_id) {
+  const result = await this.model("Review").aggregate([
     {
       $match: {
-        product_id: this.product_id,
+        product_id,
       },
     },
     {
       $group: {
-        _id: "$product_id",
+        _id: null,
         averageRating: { $avg: "$rating" },
-      },
-    },
-    {
-      $merge: {
-        into: "products",
-        on: "_id",
-        whenNotMatched: "discard",
+        numOfReviews: { $sum: 1 },
       },
     },
   ]);
-}
+
+  try {
+    await this.model("Product").findOneAndUpdate(
+      { _id: product_id },
+      {
+        averageRating: Math.ceil(result[0]?.averageRating || 0),
+        numOfReviews: Math.ceil(result[0]?.numOfReviews || 0),
+      }
+    );
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+ReviewSchema.post("save", async function () {
+  await this.constructor.calculateAverageRating(this.product_id);
+  console.log("save hook");
+});
+
+ReviewSchema.post("remove", async function () {
+  await this.constructor.calculateAverageRating(this.product_id);
+  console.log("remove hook");
+});
+ReviewSchema.post("update", async function () {
+  await this.constructor.calculateAverageRating(this.product_id);
+  console.log("update hook");
+});
 
 module.exports = mongoose.model("Review", ReviewSchema);

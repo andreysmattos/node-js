@@ -46,6 +46,7 @@ const ProductSchema = new mongoose.Schema(
       default: 15,
     },
     averageRating: { type: "number", default: 0 },
+    numOfReviews: { type: "number", default: 0 },
     user_id: { type: mongoose.Types.ObjectId, ref: "User", required: true },
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
