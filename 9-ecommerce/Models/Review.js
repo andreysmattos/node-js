@@ -27,6 +27,29 @@ const ReviewSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-ReviewSchema.index({ product: 1, user: 1 }, { unique: 1 });
+ReviewSchema.post(["remove", "create", "update", "save"], updateReviews);
+
+async function updateReviews(next) {
+  await this.model("Review").aggregate([
+    {
+      $match: {
+        product_id: this.product_id,
+      },
+    },
+    {
+      $group: {
+        _id: "$product_id",
+        averageRating: { $avg: "$rating" },
+      },
+    },
+    {
+      $merge: {
+        into: "products",
+        on: "_id",
+        whenNotMatched: "discard",
+      },
+    },
+  ]);
+}
 
 module.exports = mongoose.model("Review", ReviewSchema);

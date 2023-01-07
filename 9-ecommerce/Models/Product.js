@@ -59,6 +59,7 @@ ProductSchema.virtual("reviews", {
 });
 
 ProductSchema.post("remove", async function (product) {
+  console.log("Testing first remove");
   await Review.deleteMany({ product_id: product._id });
 });
 
