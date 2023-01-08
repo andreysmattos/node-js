@@ -4,6 +4,7 @@ const authenticateController = require("../controllers/authenticateController");
 const userController = require("../controllers/userController");
 const productController = require("../controllers/productController");
 const reviewController = require("../controllers/reviewController");
+const orderController = require("../controllers/orderController");
 
 router.post(`/auth/register`, authenticateController.register);
 router.post(`/auth/login`, authenticateController.login);
@@ -20,7 +21,6 @@ router.patch(
 router.get(`/users/:id`, auth, userController.show);
 
 router.get("/products/:id/reviews", auth, reviewController.showByProduct);
-
 
 router.get("/products", productController.index);
 router.get("/products/:id", productController.show);
@@ -47,6 +47,10 @@ router.post("/reviews", auth, reviewController.store);
 router.patch("/reviews/:id", auth, reviewController.update);
 router.delete("/reviews/:id", auth, reviewController.destroy);
 
-
+router.get("/orders", auth, hasRole("admin"), orderController.index);
+router.get("/orders/showAllMyOrders", auth, orderController.currents);
+router.post("/orders", auth, orderController.store);
+router.get("/orders/:id", auth, orderController.show);
+router.patch("/orders/:id", auth, orderController.update);
 
 module.exports = router;
