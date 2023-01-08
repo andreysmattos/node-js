@@ -48,6 +48,7 @@ router.patch("/reviews/:id", auth, reviewController.update);
 router.delete("/reviews/:id", auth, reviewController.destroy);
 
 router.get("/orders", auth, hasRole("admin"), orderController.index);
+
 router.get("/orders/showAllMyOrders", auth, orderController.currents);
 router.post("/orders", auth, orderController.store);
 router.get("/orders/:id", auth, orderController.show);
