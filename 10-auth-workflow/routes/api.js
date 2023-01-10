@@ -10,6 +10,8 @@ router.post(`/auth/register`, authenticateController.register);
 router.post(`/auth/login`, authenticateController.login);
 router.get(`/auth/logout`, authenticateController.logout);
 
+router.post(`/auth/verify-email`, authenticateController.verifyEmail);
+
 router.get(`/users`, auth, hasRole("admin"), userController.index);
 router.get(`/users/showMe`, auth, userController.showCurrent);
 router.patch(`/users/current`, auth, userController.updateCurrent);

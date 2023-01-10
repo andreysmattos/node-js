@@ -1,8 +1,10 @@
 const { StatusCodes } = require("http-status-codes");
-const { BadRequest, Unanthenticated } = require("../Exceptions");
+const { BadRequest, Unanthenticated, NotFound } = require("../Exceptions");
 const User = require("../Models/User");
 const jwt = require("../utils/jwt");
 const createUserToToken = require("../utils/createUserToToken");
+const crypto = require("crypto");
+const Unauthenticated = require("../Exceptions/Unanthenticated");
 
 const register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -15,13 +17,22 @@ const register = async (req, res) => {
 
   const role = isFirstAccount ? "admin" : "user";
 
-  const user = new User({ name, email, password, role });
+  const verification_token = crypto.randomBytes(40).toString("hex");
+
+  const user = new User({
+    name,
+    email,
+    password,
+    role,
+    verification_token,
+  });
   await user.save();
 
-  const userToToken = createUserToToken(user);
-  jwt.attachCookiesToResponse(res, userToToken);
-
-  return res.status(StatusCodes.CREATED).json({ user: userToToken });
+  //temporary send token
+  return res.status(StatusCodes.OK).json({
+    msg: "Success! Please check your email to verify account",
+    token: user.verification_token,
+  });
 };
 
 const login = async (req, res) => {
@@ -37,6 +48,8 @@ const login = async (req, res) => {
   if (!(await user.attempt(password)))
     throw new Unanthenticated("User does not exists.");
 
+  if (!user.is_verified) throw new Unanthenticated("Please verify your email.");
+
   const userToToken = createUserToToken(user);
   jwt.attachCookiesToResponse(res, userToToken);
 
@@ -49,8 +62,36 @@ const logout = async (req, res) => {
   return res.status(StatusCodes.OK).json({});
 };
 
+const verifyEmail = async (req, res) => {
+  const { verification_token, email } = req.body;
+
+  console.log({ verification_token, email });
+
+  if (!verification_token || !email) throw new NotFound("");
+
+  const user = await User.findOne({ email });
+  if (!user) throw new BadRequest();
+
+  console.log(user);
+  console.log(user.verification_token);
+  console.log(verification_token);
+
+  if (user.verification_token !== verification_token)
+    throw new Unauthenticated();
+
+  user.verify = true;
+  user.verified_at = new Date();
+
+  user.verification_token = null;
+
+  await user.save();
+
+  return res.status(StatusCodes.OK).json({ msg: "E-mail verified" });
+};
+
 module.exports = {
   register,
   login,
   logout,
+  verifyEmail,
 };
