@@ -5,7 +5,7 @@ const jwt = require("../utils/jwt");
 const createUserToToken = require("../utils/createUserToToken");
 const crypto = require("crypto");
 const Unauthenticated = require("../Exceptions/Unanthenticated");
-const mail = require("../utils/mail");
+const verificationEmail = require("../mail/verificationEmail");
 
 const register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -29,9 +29,15 @@ const register = async (req, res) => {
   });
   await user.save();
 
-  await mail.send();
-  // token: user.verification_token,
-  //temporary send token
+  const origin = "http://127.0.0.1:5000";
+
+  await verificationEmail({
+    name: user.name,
+    email: user.email,
+    verificationToken: user.verification_token,
+    origin,
+  });
+
   return res.status(StatusCodes.OK).json({
     msg: "Success! Please check your email to verify account",
   });
