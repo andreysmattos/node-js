@@ -1,6 +1,7 @@
 const { StatusCodes } = require("http-status-codes");
 const { BadRequest, Unanthenticated, NotFound } = require("../Exceptions");
 const User = require("../Models/User");
+const Token = require("../Models/Token");
 const jwt = require("../utils/jwt");
 const createUserToToken = require("../utils/createUserToToken");
 const crypto = require("crypto");
@@ -59,13 +60,38 @@ const login = async (req, res) => {
   if (!user.is_verified) throw new Unanthenticated("Please verify your email.");
 
   const userToToken = createUserToToken(user);
-  jwt.attachCookiesToResponse(res, userToToken);
+  let refreshToken = "";
+
+  const existingToken = await Token.findOne({ user_id: user._id });
+
+  if (existingToken) {
+    const { isValid } = existingToken;
+
+    if (!isValid) throw new Unanthenticated();
+
+    refreshToken = existingToken.refreshToken;
+    jwt.attachCookiesToResponse(res, userToToken, refreshToken);
+    return res.status(StatusCodes.OK).json({ user: userToToken });
+  }
+
+  refreshToken = crypto.randomBytes(40).toString("hex");
+  const userAgent = req.headers["user-agent"];
+  const ip = req.ip;
+  const userToken = { refreshToken, userAgent, ip, user_id: user._id };
+  await Token.create(userToken);
+
+  console.log(userToken);
+
+  jwt.attachCookiesToResponse(res, userToToken, refreshToken);
 
   return res.status(StatusCodes.OK).json({ user: userToToken });
 };
 
 const logout = async (req, res) => {
-  res.cookie("token", "", { httpOnly: true, expires: new Date(0) });
+  await Token.findOneAndDelete({ user_id: req.user._id });
+
+  res.cookie("acessToken", "", { httpOnly: true, expires: new Date(0) });
+  res.cookie("refreshToken", "", { httpOnly: true, expires: new Date(0) });
 
   return res.status(StatusCodes.OK).json({});
 };
@@ -87,7 +113,7 @@ const verifyEmail = async (req, res) => {
   if (user.verification_token !== verification_token)
     throw new Unauthenticated();
 
-  user.verify = true;
+  user.is_verified = true;
   user.verified_at = new Date();
 
   user.verification_token = null;

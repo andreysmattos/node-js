@@ -8,7 +8,7 @@ const orderController = require("../controllers/orderController");
 
 router.post(`/auth/register`, authenticateController.register);
 router.post(`/auth/login`, authenticateController.login);
-router.get(`/auth/logout`, authenticateController.logout);
+router.get(`/auth/logout`, auth, authenticateController.logout);
 
 router.post(`/auth/verify-email`, authenticateController.verifyEmail);
 
