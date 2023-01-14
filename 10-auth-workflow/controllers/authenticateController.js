@@ -7,6 +7,7 @@ const createUserToToken = require("../utils/createUserToToken");
 const crypto = require("crypto");
 const Unauthenticated = require("../Exceptions/Unanthenticated");
 const verificationEmail = require("../mail/verificationEmail");
+const resetPasswordEmail = require("../mail/resetPasswordEmail");
 
 const register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -123,9 +124,76 @@ const verifyEmail = async (req, res) => {
   return res.status(StatusCodes.OK).json({ msg: "E-mail verified" });
 };
 
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) throw new BadRequest("Provide valid email");
+
+  const user = await User.findOne({ email });
+
+  console.log({ user });
+
+  if (user) {
+    const passwordToken = crypto.randomBytes(70).toString("hex");
+    // send email
+
+    const origin = "http://127.0.0.1:5000";
+
+    await resetPasswordEmail({
+      name: user.name,
+      email: user.email,
+      token: passwordToken,
+      origin,
+    });
+
+    const tenMinutes = 1000 * 60 * 10;
+    const passwordTokemExpirationDate = new Date(Date.now() + tenMinutes);
+
+    user.password_token = passwordToken;
+    user.password_token_expiration = passwordTokemExpirationDate;
+
+    await user.save();
+  }
+
+  res
+    .status(StatusCodes.OK)
+    .json({ msg: "Please check your email for reset password link" });
+};
+
+const resetPassword = async (req, res) => {
+  const { token, email, password } = req.body;
+
+  if (!token || !email || !password)
+    throw new BadRequest("Please provide all values");
+
+  const user = await User.findOne({ email });
+
+  if (user) {
+    const currentDate = new Date();
+
+    if (
+      user.password_token === token &&
+      user.password_token_expiration > currentDate
+    ) {
+      user.password = password;
+      user.password_token = null;
+      user.password_token_expiration = null;
+      await user.save();
+      console.log('deu');
+    }
+  }
+
+
+
+  // console.log({ token, email, password });
+  res.status(200).json({ msg: "reset password" });
+};
+
 module.exports = {
   register,
   login,
   logout,
   verifyEmail,
+  forgotPassword,
+  resetPassword,
 };

@@ -10,6 +10,9 @@ router.post(`/auth/register`, authenticateController.register);
 router.post(`/auth/login`, authenticateController.login);
 router.get(`/auth/logout`, auth, authenticateController.logout);
 
+router.post(`/auth/forgot-password`, authenticateController.forgotPassword);
+router.post(`/auth/reset-password`, authenticateController.resetPassword);
+
 router.post(`/auth/verify-email`, authenticateController.verifyEmail);
 
 router.get(`/users`, auth, hasRole("admin"), userController.index);
